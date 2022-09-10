@@ -1,0 +1,59 @@
+[
+    {
+        "id": 1,
+        "status": 1,
+        "minute": 0,
+        "homeTeam": {
+            "team": {
+                "id": 1,
+                "name": "Germany"
+            },
+            "goals": []
+        },
+        "awayTeam": {
+            "team": {
+                "id": 2,
+                "name": "Poland"
+            },
+            "goals": []
+        }
+    },
+    {
+        "id": 2,
+        "status": 1,
+        "minute": 0,
+        "homeTeam": {
+            "team": {
+                "id": 3,
+                "name": "Brazil"
+            },
+            "goals": []
+        },
+        "awayTeam": {
+            "team": {
+                "id": 4,
+                "name": "Mexico"
+            },
+            "goals": []
+        }
+    },
+    {
+        "id": 3,
+        "status": 1,
+        "minute": 0,
+        "homeTeam": {
+            "team": {
+                "id": 5,
+                "name": "Argentina"
+            },
+            "goals": []
+        },
+        "awayTeam": {
+            "team": {
+                "id": 6,
+                "name": "Uruguay"
+            },
+            "goals": []
+        }
+    }
+]
