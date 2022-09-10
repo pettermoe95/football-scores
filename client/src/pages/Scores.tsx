@@ -1,17 +1,46 @@
+import { useState } from 'react';
 import { Button, Card, Container } from 'react-bootstrap'
+import { GameDetail, TeamScore, GameStatus } from '../../../common/models/games';
+import Game from '../components/Game'
+import jsonGames from '../data/games.json'
 
 function Scores() {
 
-  function gameOngoing(): boolean {
-    return true;
+  // Replace this later
+  const [games, setGames] = useState(jsonGames.map(game => new GameDetail(
+    game.id,
+    game.status,
+    game.minute,
+    new TeamScore(game.homeTeam.team, game.homeTeam.goals),
+    new TeamScore(game.awayTeam.team, game.awayTeam.goals),
+  )));
+
+  function gamesStatus(): GameStatus {
+    if(games.some(game => game.status == GameStatus.ONGOING)){
+      return GameStatus.ONGOING;
+    }
+    if(games.every(game => game.status == GameStatus.NOT_STARTED)){
+      return GameStatus.NOT_STARTED;
+    }
+    if(games.every(game => game.status == GameStatus.FINISHED)){
+      return GameStatus.FINISHED;
+    }
+    return GameStatus.BREAK;
+  }
+
+  function setGamesStatus(status: GameStatus) {
+    setGames(games.map(game => {
+      game.status = status;
+      return game;
+    }))
   }
 
   function startGames() {
-    console.log('Starting games!')
+    setGamesStatus(GameStatus.ONGOING);
   }
 
   function finishGames() {
-    console.log('Starting games!')
+    setGamesStatus(GameStatus.FINISHED);
   }
 
   function totalGoals(): number {
@@ -24,7 +53,7 @@ function Scores() {
         <Card.Body className="d-flex flex-column">
           
           {
-            !gameOngoing() &&
+            [GameStatus.NOT_STARTED, GameStatus.FINISHED].includes(gamesStatus()) &&
             <Button
               className='mb-3'
               variant="outline-dark"
@@ -32,11 +61,11 @@ function Scores() {
               style={{width: '6rem', margin: '0 auto'}}
               onClick={() => startGames()}
             >
-              Start
+              {gamesStatus() == GameStatus.NOT_STARTED ? 'Start' : 'Restart'}
             </Button>
           }
           {
-            gameOngoing() &&
+            gamesStatus() == GameStatus.ONGOING &&
             <Button
               className='mb-3'
               variant="outline-dark"
@@ -48,30 +77,10 @@ function Scores() {
             </Button>
           }
           
-          <div className="Game p-1">
-            <span style={{width: '12rem', float: 'left', textAlign: 'left'}}>
-              Germany vs Poland
-            </span>
-            <span style={{float: 'left'}}>
-              0:0
-            </span>
-          </div>
-          <div className="Game p-1">
-            <span style={{width: '12rem', float: 'left', textAlign: 'left'}}>
-              Brazil vs Mexico
-            </span>
-            <span style={{float: 'left'}}>
-              0:0
-            </span>
-          </div>
-          <div className="Game p-1">
-            <span style={{width: '12rem', float: 'left', textAlign: 'left'}}>
-              Argentina vs Uruguay
-            </span>
-            <span style={{float: 'left'}}>
-              0:0
-            </span>
-          </div>
+          {games.map(game => (
+            <Game key={game.id} {...game}/>
+          ))}
+
           <span className="pt-3" style={{textAlign: 'right'}}>
             Total goals: {totalGoals()}
           </span>
