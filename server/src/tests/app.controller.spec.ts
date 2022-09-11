@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { GameController } from '../controllers/game.controller';
 import { GameService } from '../services/game.service';
 import * as jsonGames from '../data/games.json';
-import { appendFile } from 'fs';
+import { GameStatus } from '../../../common/models/games';
 
 describe('GameController', () => {
   let gameController: GameController;
@@ -19,15 +19,22 @@ describe('GameController', () => {
   });
 
   describe('games', () => {
-    it('should return initial game values from json file"', () => {
+    it('should return initial game values from json file', () => {
       expect(gameController.getGames()).toStrictEqual(JSON.parse(JSON.stringify(jsonGames)));
     });
   });
 
   describe('games', () => {
-    it('should generate a goal"', () => {
-      const newGoal = gameService.generateRandomGoal()
-      expect(jsonGames.map(game => {return game.id})).toContain(newGoal.gameId)
+    it('should generate a goal', () => {
+      const newGoal = gameService.generateRandomGoal();
+      expect(jsonGames.map(game => {return game.id})).toContain(newGoal.gameId);
+    });
+  });
+
+  describe('games', () => {
+    it('should start all games', () => {
+      gameController.startGames();
+      gameService.games.forEach(game => expect(game.status).toBe(GameStatus.ONGOING));
     });
   });
 

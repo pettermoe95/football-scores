@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Post } from '@nestjs/common';
 import { GameDetail } from '../../../common/models/games';
 import { GameService } from '../services/game.service';
 
@@ -8,6 +8,12 @@ export class GameController {
 
   @Get('/games')
   getGames(): Array<GameDetail> {
-    return this.gameService.getGames();
+    return this.gameService.games;
+  }
+
+  @Get('/games/start')
+  startGames(): Array<GameDetail> {
+    this.gameService.startGames();
+    return this.gameService.games;
   }
 }
