@@ -24,18 +24,4 @@ describe('GameController', () => {
     });
   });
 
-  describe('games', () => {
-    it('should generate a goal', () => {
-      const newGoal = gameService.generateRandomGoal();
-      expect(jsonGames.map(game => {return game.id})).toContain(newGoal.gameId);
-    });
-  });
-
-  describe('games', () => {
-    it('should start all games', () => {
-      gameController.startGames();
-      gameService.games.forEach(game => expect(game.status).toBe(GameStatus.ONGOING));
-    });
-  });
-
 });
