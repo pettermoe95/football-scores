@@ -16,3 +16,14 @@ npm run dev
 ```
 
 You should have the server running at port :3000 and client at :8085
+
+## Logic
+The server stores a list of games that are ready to start. Once the user presses the start button, an api call is made to start simulating the games.
+
+Every minute(second in real life) an event is created for each game, updating the minutes and status of the game.
+
+When a goal is scored a goal event is created.
+
+The client gets the events using EventSource, and updates the components state in real time.
+
+Once the games reach 90 minutes the simulation stops.
