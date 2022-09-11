@@ -25,3 +25,5 @@ Every minute(second in real life) an event is created for each game, updating th
 When a goal is scored a goal event is created.
 
 The client gets the events using EventSource, and updates the components state in real time.
+
+Once the games reach 90 minutes the simulation stops.
