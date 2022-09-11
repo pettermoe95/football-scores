@@ -12,7 +12,8 @@ export class GameController {
   }
 
   @Get('/games/start')
-  startGames(){
-    this.gameService.games;
+  startGames(): Array<GameDetail> {
+    this.gameService.startGames();
+    return this.gameService.games;
   }
 }

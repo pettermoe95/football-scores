@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Observable, Subject } from 'rxjs';
 import {
   addGoalEventToGames,
   GameDetail,
@@ -25,6 +26,9 @@ export class GameService {
   gameTimer: NodeJS.Timer;
   gamesMinutes = 0;
 
+  private goalEvents = new Subject<MessageEvent<GoalEvent>>();
+  private gameEvents = new Subject<MessageEvent<IGameDetail>>();
+
   constructor() {
     this.games = JSON.parse(JSON.stringify(jsonGames))
   }
@@ -41,6 +45,14 @@ export class GameService {
 
   get hasReachedMaxMinutes(): boolean {
     return this.gamesMinutes >= MAX_MINUTES;
+  }
+  
+  sendGameEvents(): Observable<MessageEvent<IGameDetail>> {
+    return this.gameEvents.asObservable();
+  }
+
+  sendGoalEvents(): Observable<MessageEvent<GoalEvent>> {
+    return this.goalEvents.asObservable();
   }
 
   /**
@@ -61,6 +73,8 @@ export class GameService {
       game.status = GameStatus.FINISHED;
       return game;
     })
+    //games are stopped and needs to be updated
+    this.addGameEvents();
   }
 
   /**
@@ -76,21 +90,38 @@ export class GameService {
         game.minute = this.gamesMinutes
       })
       console.log(this.games[0].minute);
+      //Minutes in games changed, reuires event
+      this.addGameEvents();
       //Add a random goal for every 10 min
-      if(
-        this.gamesMinutes % GOAL_INTERVAL == 0 &&
-        ! this.hasReachedMaxGoals
-      ) {
-        this.addRandomGoal();
-      }
+      this.checkForGoals();
       //IF 10 goals are reached timer should stop
       if(this.hasReachedMaxMinutes) this.stopGames();
     }, ONE_MINUTE_SCALE)
   }
 
+  checkForGoals() {
+    if(
+      this.gamesMinutes % GOAL_INTERVAL == 0 &&
+      ! this.hasReachedMaxGoals
+    ) {
+      this.addRandomGoal();
+    }
+  }
+
   addRandomGoal() {
     const newGoal = generateRandomGoal(this.games);
     this.games = addGoalEventToGames(newGoal, this.games);
+    this.goalEvents.next({data: newGoal} as MessageEvent<GoalEvent>);
+  }
+
+  addGameEvents() {
+    this.games.forEach(game => {
+      this.gameEvents.next(
+        {
+          data: game as IGameDetail
+        } as MessageEvent<IGameDetail>
+      );
+    })
   }
 
 }
