@@ -136,6 +136,20 @@ function gameDetailFromInterface(
   )
 }
 
+function updateGameDetail(
+  gameDetail: IGameDetail,
+  games: Array<GameDetail>
+): Array<GameDetail>
+{
+  games.map(game => {
+    if(game.id === gameDetail.id){
+      game.minute = gameDetail.minute;
+      game.status = gameDetail.status;
+    }
+  })
+  return games
+}
+
 import { GoalEvent } from './events'
 
 export {
@@ -145,7 +159,8 @@ export {
   GameStatus,
   generateRandomGoal,
   addGoalEventToGames,
-  gameDetailFromInterface
+  gameDetailFromInterface,
+  updateGameDetail
 }
 
 export type {

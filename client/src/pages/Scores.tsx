@@ -1,19 +1,72 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button, Card, Container } from 'react-bootstrap'
-import { GameDetail, TeamScore, GameStatus } from '../../../common/models/games';
+import {
+  GameDetail,
+  GameStatus,
+  GoalEvent,
+  addGoalEventToGames,
+  IGameDetail,
+  updateGameDetail
+} from '../../../common/models/games';
 import Game from '../components/Game'
-import jsonGames from '../data/games.json'
+import * as api from '../services/scores'
 
 function Scores() {
 
   // Replace this later
-  const [games, setGames] = useState(jsonGames.map(game => new GameDetail(
-    game.id,
-    game.status,
-    game.minute,
-    new TeamScore(game.homeTeam.team, game.homeTeam.goals),
-    new TeamScore(game.awayTeam.team, game.awayTeam.goals),
-  )));
+  const [games, setGames] = useState(Array<GameDetail>());
+
+  function updateGames() {
+    api.getGames().then(gameDetails => {
+      setGames(gameDetails);
+    })
+  }
+
+  useEffect(() => {
+    updateGames();
+  }, [])
+
+  useEffect(() => {
+    /* For handling Goal Events */
+    const goalEventSource = new EventSource('/events/goal')
+
+    const processData = (goalEvent: GoalEvent) => {
+      setGames(addGoalEventToGames(goalEvent, games))
+    }
+
+    goalEventSource.onmessage = e => processData(JSON.parse(e.data))
+
+    goalEventSource.onerror = (e) => {
+      console.error(e);
+      goalEventSource.close();
+    }
+
+    return () => {
+      goalEventSource.close();
+    };
+
+  }, [games])
+
+  useEffect(() => {
+    /* For handling Goal Events */
+    const es = new EventSource('/events/game')
+
+    const processData = (gameDetail: IGameDetail) => {
+      setGames(updateGameDetail(gameDetail, games));
+    }
+
+    es.onmessage = e => processData(JSON.parse(e.data))
+
+    es.onerror = (e) => {
+      console.error(e);
+      es.close();
+    }
+
+    return () => {
+      es.close();
+    };
+
+  }, [games])
 
   function gamesStatus(): GameStatus {
     if(games.some(game => game.status == GameStatus.ONGOING)){
@@ -28,23 +81,19 @@ function Scores() {
     return GameStatus.BREAK;
   }
 
-  function setGamesStatus(status: GameStatus) {
-    setGames(games.map(game => {
-      game.status = status;
-      return game;
-    }))
+  async function startGames() {
+    await api.startGames();
+    updateGames();
   }
 
-  function startGames() {
-    setGamesStatus(GameStatus.ONGOING);
-  }
-
-  function finishGames() {
-    setGamesStatus(GameStatus.FINISHED);
+  async function finishGames() {
+    await api.finishGames();
   }
 
   function totalGoals(): number {
-    return 0;
+    return games.reduce((accum, current) => {
+      return accum + current.totalGoals;
+    }, 0);
   }
 
   return (

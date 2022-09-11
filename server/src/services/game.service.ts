@@ -7,8 +7,6 @@ import {
   GameStatus,
   generateRandomGoal,
   GoalEvent,
-  TeamScore,
-  TeamSide,
   gameDetailFromInterface
 } from '../../../common/models/games';
 import * as jsonGames from '../data/games.json';
@@ -60,22 +58,48 @@ export class GameService {
    *    this.games. Set game status to ongoing
    */
    startGames() {
+    this.gamesMinutes = 0;
     const gamesClone = deepCloneObj<Array<IGameDetail>>(jsonGames);
     this.games = gamesClone.map(( game =>
       gameDetailFromInterface(game)
     ));
     this.startGamesTimer();
+    this.games.map(game => game.status = GameStatus.ONGOING);
   }
 
   stopGames() {
     clearInterval(this.gameTimer);
-    this.games = this.games.map(game => {
-      game.status = GameStatus.FINISHED;
-      return game;
-    })
+    this.games.map(game => game.status = GameStatus.FINISHED)
     //games are stopped and needs to be updated
     this.addGameEvents();
   }
+
+    /*
+   *   Since there should be 10 random goals we generate 
+   *   the missing goals and add them to games list.
+   *   Finally we set gamestatus to finished.
+   */
+    finishGames(): Array<GameDetail> {
+      this.stopGamesTimer()
+  
+      var goalsCount = this.totalGoals
+  
+      const goalsToAdd = () => {
+        const goals: Array<GoalEvent> = []
+        while(goalsCount < MAX_GOALS){
+          goals.push(generateRandomGoal(this.games));
+          goalsCount++
+        }
+        return goals
+      }
+      goalsToAdd().forEach(goal => {
+        console.log('adding random goal to finish sim');
+        this.addGoalToGamesList(goal);
+      });
+      
+      this.stopGames();
+      return this.games;
+    }
 
   /**
    * Starts an interval for the games,
@@ -99,19 +123,23 @@ export class GameService {
     }, ONE_MINUTE_SCALE)
   }
 
+  stopGamesTimer() {
+    clearInterval(this.gameTimer);
+  }
+
   checkForGoals() {
     if(
       this.gamesMinutes % GOAL_INTERVAL == 0 &&
       ! this.hasReachedMaxGoals
     ) {
-      this.addRandomGoal();
+      const newGoal = generateRandomGoal(this.games);
+      this.addGoalToGamesList(newGoal);
     }
   }
 
-  addRandomGoal() {
-    const newGoal = generateRandomGoal(this.games);
-    this.games = addGoalEventToGames(newGoal, this.games);
-    this.goalEvents.next({data: newGoal} as MessageEvent<GoalEvent>);
+  addGoalToGamesList(goal: GoalEvent) {
+    this.games = addGoalEventToGames(goal, this.games);
+    this.goalEvents.next({data: goal} as MessageEvent<GoalEvent>);
   }
 
   addGameEvents() {
@@ -123,5 +151,4 @@ export class GameService {
       );
     })
   }
-
 }

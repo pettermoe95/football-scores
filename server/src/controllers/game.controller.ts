@@ -11,9 +11,14 @@ export class GameController {
     return this.gameService.games;
   }
 
-  @Get('/games/start')
+  @Post('/games/start')
   startGames(): Array<GameDetail> {
     this.gameService.startGames();
     return this.gameService.games;
+  }
+
+  @Post('/games/finish')
+  finishGames(): Array<GameDetail> {
+    return this.gameService.finishGames();
   }
 }
