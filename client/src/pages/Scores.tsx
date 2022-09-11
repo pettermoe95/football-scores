@@ -87,7 +87,8 @@ function Scores() {
   }
 
   async function finishGames() {
-    await api.finishGames();
+     await api.finishGames();
+     updateGames();
   }
 
   function totalGoals(): number {

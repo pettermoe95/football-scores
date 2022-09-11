@@ -27,7 +27,7 @@ async function startGames(): Promise<void> {
 async function finishGames(): Promise<void> {
   await fetch(BASE_URL + '/games/finish', {
     method: "POST",
-  });
+  })
 }
 
 export {

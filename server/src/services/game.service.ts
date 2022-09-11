@@ -12,7 +12,7 @@ import {
 import * as jsonGames from '../data/games.json';
 import { deepCloneObj } from '../utils/'
 
-const ONE_MINUTE_SCALE = 100;
+const ONE_MINUTE_SCALE = 1000;
 const GOAL_INTERVAL = 10; // in minutes
 const MAX_GOALS = 9;
 const MAX_MINUTES = 90;
